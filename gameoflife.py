@@ -1,4 +1,7 @@
 #!/usr/bin/env python
+#Jose D'Aquino
+#National Institute of Astrophysics, Optics and Electronics
+#jdxaquino@gmail.com
 
 import pygame
 import numpy as np
@@ -80,7 +83,7 @@ while True:
                 if gameState[x, y] == 0 and n_neigh == 3:
                     newGameState[x, y] = 1
                     
-                    # regla 2: una celula viva con menos de 2 o mas de 3 vecinas vivas, muere
+                # regla 2: una celula viva con menos de 2 o mas de 3 vecinas vivas, muere
                 elif gameState[x, y] == 1 and (n_neigh < 2 or n_neigh > 3):
                     newGameState[x, y] = 0
                     
