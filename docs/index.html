@@ -1,0 +1,725 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Juego de la Vida</title>
+<meta name="description" content="El Juego de la Vida de Conway en el navegador: pinta células, coloca patrones clásicos y prueba otras reglas.">
+<style>
+  :root {
+    color-scheme: light dark;
+    --fondo: #f3f2ee;
+    --panel: #ffffff;
+    --texto: #1c1c1e;
+    --suave: #66666d;
+    --borde: #dcdad3;
+    --acento: #c2410c;
+    --acento-texto: #ffffff;
+    --lienzo: #fbfaf7;
+    --celula: #1c1c1e;
+    --rejilla: rgba(0, 0, 0, 0.07);
+    --fantasma: rgba(28, 110, 230, 0.55);
+    --error: #c92a2a;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --fondo: #111113;
+      --panel: #1b1b1e;
+      --texto: #ececef;
+      --suave: #9c9ca3;
+      --borde: #2f2f34;
+      --acento: #ffb03a;
+      --acento-texto: #1b1b1e;
+      --lienzo: #19191b;
+      --celula: #ffffff;
+      --rejilla: rgba(255, 255, 255, 0.06);
+      --fantasma: rgba(90, 170, 255, 0.6);
+      --error: #ff6b6b;
+    }
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body {
+    background: var(--fondo);
+    color: var(--texto);
+    font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+  header, .controles, footer { padding: 0 16px; max-width: 1200px; width: 100%; margin: 0 auto; }
+  header {
+    display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between;
+    gap: 4px 24px; padding-top: 16px;
+  }
+  h1 { font-size: 1.35rem; margin: 0; letter-spacing: -0.01em; }
+  .intro { margin: 2px 0 0; color: var(--suave); font-size: 0.9rem; max-width: 62ch; }
+  .estadisticas { display: flex; gap: 18px; font-variant-numeric: tabular-nums; }
+  .estadisticas b { font-size: 1.1rem; }
+  .estadisticas span { color: var(--suave); font-size: 0.8rem; display: block; }
+
+  .controles { display: flex; flex-direction: column; gap: 8px; padding-top: 12px; padding-bottom: 10px; }
+  .fila { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; }
+  .grupo { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+  .grupo > .etiqueta { color: var(--suave); font-size: 0.85rem; }
+
+  button, select, input[type="text"] {
+    font: inherit; color: var(--texto); background: var(--panel);
+    border: 1px solid var(--borde); border-radius: 8px; padding: 6px 12px; min-height: 36px;
+  }
+  button { cursor: pointer; }
+  button:hover { border-color: var(--suave); }
+  button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--acento); outline-offset: 1px; }
+  button.principal { background: var(--acento); color: var(--acento-texto); border-color: var(--acento); font-weight: 600; min-width: 118px; }
+  .segmentado { display: inline-flex; border: 1px solid var(--borde); border-radius: 8px; overflow: hidden; }
+  .segmentado button { border: 0; border-radius: 0; border-right: 1px solid var(--borde); }
+  .segmentado button:last-child { border-right: 0; }
+  .segmentado button[aria-pressed="true"] { background: var(--texto); color: var(--fondo); }
+  input[type="text"] { width: 9.5em; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  input[aria-invalid="true"] { border-color: var(--error); color: var(--error); }
+  input[type="range"] { accent-color: var(--acento); width: 130px; }
+  label.check { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+  input[type="checkbox"] { accent-color: var(--acento); width: 17px; height: 17px; }
+  .valor { font-variant-numeric: tabular-nums; min-width: 5.5em; font-size: 0.9rem; }
+
+  .tablero {
+    flex: 1; min-height: 300px; margin: 0 16px 10px; display: flex; align-items: center; justify-content: center;
+  }
+  canvas {
+    display: block; background: var(--lienzo); border: 1px solid var(--borde); border-radius: 6px;
+    touch-action: none; cursor: crosshair;
+  }
+  footer { color: var(--suave); font-size: 0.8rem; padding-bottom: 14px; }
+  footer kbd {
+    font: 0.75rem ui-monospace, monospace; border: 1px solid var(--borde); border-bottom-width: 2px;
+    border-radius: 4px; padding: 0 4px; background: var(--panel); color: var(--texto);
+  }
+  footer a { color: inherit; }
+  .aviso { color: var(--error); font-size: 0.85rem; min-height: 1.2em; }
+  @media (max-width: 600px) {
+    /* en el movil el tablero va primero, justo bajo el titulo */
+    header { order: 0; }
+    .tablero { order: 1; flex: none; height: 62svh; min-height: 280px; margin-top: 10px; }
+    .controles { order: 2; }
+    footer { order: 3; }
+    .intro { display: none; }
+    .ocultar-movil { display: none; }
+    input[type="range"] { width: 100px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>Juego de la Vida</h1>
+    <p class="intro">Una célula viva con 2 o 3 vecinas sobrevive; una muerta con exactamente 3 nace. Pinta sobre el tablero, coloca patrones o prueba otras reglas.</p>
+  </div>
+  <div class="estadisticas" aria-live="off">
+    <div><span>Generación</span><b id="generacion">0</b></div>
+    <div><span>Población</span><b id="poblacion">0</b></div>
+  </div>
+</header>
+
+<section class="controles" aria-label="Controles">
+  <div class="fila">
+    <div class="grupo">
+      <button id="reproducir" class="principal" title="Espacio">Pausar</button>
+      <button id="paso" title="N">Paso</button>
+      <button id="limpiar" title="C">Limpiar</button>
+      <button id="aleatorio" title="R">Aleatorio</button>
+    </div>
+    <div class="grupo">
+      <label class="etiqueta" for="velocidad">Velocidad</label>
+      <input id="velocidad" type="range" min="0" max="8" step="1" value="3">
+      <span id="velocidad-valor" class="valor">10 gen/s</span>
+    </div>
+  </div>
+  <div class="fila">
+    <div class="grupo">
+      <span class="etiqueta">Herramienta</span>
+      <div class="segmentado" role="group" aria-label="Herramienta">
+        <button data-herramienta="pincel" aria-pressed="true" title="B">Pincel</button>
+        <button data-herramienta="goma" aria-pressed="false" title="E">Goma</button>
+        <button data-herramienta="patron" aria-pressed="false" title="P o 1-8">Patrón</button>
+      </div>
+      <select id="patron" aria-label="Patrón a colocar"></select>
+    </div>
+    <div class="grupo">
+      <label class="etiqueta" for="regla">Regla</label>
+      <select id="preset" aria-label="Reglas conocidas"></select>
+      <input id="regla" type="text" value="B3/S23" spellcheck="false" autocomplete="off" aria-describedby="aviso">
+    </div>
+    <div class="grupo">
+      <label class="etiqueta" for="bordes">Bordes</label>
+      <select id="bordes">
+        <option value="toroidal">Toroidales</option>
+        <option value="fijos">Fijos</option>
+      </select>
+    </div>
+    <div class="grupo">
+      <label class="check"><input id="color-edad" type="checkbox"> Color por edad</label>
+      <label class="check"><input id="mostrar-rejilla" type="checkbox" checked> Rejilla</label>
+    </div>
+    <div class="grupo">
+      <label class="etiqueta" for="celda">Celda</label>
+      <select id="celda">
+        <option value="6">6 px</option>
+        <option value="10">10 px</option>
+        <option value="14">14 px</option>
+        <option value="20">20 px</option>
+      </select>
+    </div>
+  </div>
+  <div id="aviso" class="aviso" role="status"></div>
+</section>
+
+<div class="tablero" id="tablero">
+  <canvas id="lienzo" aria-label="Tablero del Juego de la Vida. Pulsa o arrastra para pintar células."></canvas>
+</div>
+
+<footer>
+  <p class="ocultar-movil">
+    Atajos: <kbd>Espacio</kbd> pausa · <kbd>N</kbd> paso · <kbd>C</kbd> limpiar · <kbd>R</kbd> aleatorio ·
+    <kbd>+</kbd>/<kbd>-</kbd> velocidad · <kbd>B</kbd> pincel · <kbd>E</kbd> goma · <kbd>P</kbd>/<kbd>1</kbd>-<kbd>8</kbd> patrón ·
+    <kbd>A</kbd> color por edad · <kbd>G</kbd> rejilla · <kbd>Esc</kbd> volver al pincel · clic derecho borra.
+  </p>
+  <p>Versión web del <a href="https://github.com/jdxaquino/game-of-life">Juego de la Vida en Python</a>.</p>
+</footer>
+
+<!-- Copias exactas de patrones/*.rle (un test comprueba que coinciden). -->
+<script type="text/plain" data-patron="bellota">
+#N Bellota (acorn)
+#C Siete células que evolucionan durante 5206 generaciones antes de estabilizarse.
+x = 7, y = 3, rule = B3/S23
+bo5b$3bo3b$2o2b3o!
+</script>
+<script type="text/plain" data-patron="canon-gosper">
+#N Cañón de Gosper
+#C El primer patrón descubierto que crece sin límite: dispara un glider cada 30 generaciones.
+#C Bill Gosper, 1970.
+x = 36, y = 9, rule = B3/S23
+24bo$22bobo$12b2o6b2o12b2o$11bo3bo4b2o12b2o$2o8bo5bo3b2o$2o8bo3bob2o4b
+obo$10bo5bo7bo$11bo3bo$12b2o!
+</script>
+<script type="text/plain" data-patron="diehard">
+#N Diehard
+#C Siete células que desaparecen por completo tras 130 generaciones.
+x = 8, y = 3, rule = B3/S23
+6bob$2o6b$bo3b3o!
+</script>
+<script type="text/plain" data-patron="glider">
+#N Glider
+#C La nave espacial más pequeña: avanza una celda en diagonal cada 4 generaciones.
+x = 3, y = 3, rule = B3/S23
+bo$2bo$3o!
+</script>
+<script type="text/plain" data-patron="nave-ligera">
+#N Nave ligera (LWSS)
+#C Lightweight spaceship: avanza dos celdas en horizontal cada 4 generaciones.
+x = 5, y = 4, rule = B3/S23
+bo2bo$o4b$o3bo$4o!
+</script>
+<script type="text/plain" data-patron="pentadecatlon">
+#N Pentadecatlón
+#C Oscilador de periodo 15.
+x = 10, y = 3, rule = B3/S23
+2bo4bo$2ob4ob2o$2bo4bo!
+</script>
+<script type="text/plain" data-patron="pulsar">
+#N Pulsar
+#C El oscilador de periodo 3 más común.
+x = 13, y = 13, rule = B3/S23
+2b3o3b3o2$o4bobo4bo$o4bobo4bo$o4bobo4bo$2b3o3b3o2$2b3o3b3o$o4bobo4bo$o
+4bobo4bo$o4bobo4bo2$2b3o3b3o!
+</script>
+<script type="text/plain" data-patron="r-pentomino">
+#N R-pentominó
+#C Cinco células que tardan 1103 generaciones en estabilizarse.
+x = 3, y = 3, rule = B3/S23
+b2o$2o$bo!
+</script>
+
+<script>
+"use strict";
+
+// --- reglas y patrones ------------------------------------------------------
+
+const PRESETS = [
+  ["conway", "Conway", "B3/S23"],
+  ["highlife", "HighLife", "B36/S23"],
+  ["seeds", "Seeds", "B2/S"],
+  ["dia-y-noche", "Día y noche", "B3678/S34678"],
+  ["sin-muerte", "Sin muerte", "B3/S012345678"],
+  ["laberinto", "Laberinto", "B3/S12345"],
+];
+const VELOCIDADES = [1, 2, 5, 10, 20, 30, 60, 120, 240];
+const MAX_PASOS_POR_FRAME = 8;
+const DENSIDAD = 0.25;
+
+function parseRegla(texto) {
+  const m = /^B([0-8]*)\/S([0-8]*)$/i.exec(texto.trim());
+  if (!m) return null;
+  const nacer = new Uint8Array(9), sobrevivir = new Uint8Array(9);
+  for (const d of m[1]) nacer[+d] = 1;
+  for (const d of m[2]) sobrevivir[+d] = 1;
+  const digitos = (t) => [...t].map(Number).filter((d, i, a) => a.indexOf(d) === i).sort().join("");
+  return { nacer, sobrevivir, texto: `B${digitos(m[1])}/S${digitos(m[2])}` };
+}
+
+function parseRLE(texto, nombre) {
+  let ancho = 0, alto = 0;
+  const cuerpo = [];
+  for (let linea of texto.split("\n")) {
+    linea = linea.trim();
+    if (!linea) continue;
+    if (linea.startsWith("#")) {
+      if (linea[1] === "N") nombre = linea.slice(2).trim();
+      continue;
+    }
+    if (!cuerpo.length && /^x\s*=/i.test(linea)) {
+      ancho = +(/x\s*=\s*(\d+)/i.exec(linea) || [0, 0])[1];
+      alto = +(/y\s*=\s*(\d+)/i.exec(linea) || [0, 0])[1];
+      continue;
+    }
+    cuerpo.push(linea);
+    if (linea.includes("!")) break;
+  }
+  const datos = cuerpo.join("").split("!")[0];
+  const vivas = [];
+  let f = 0, c = 0;
+  for (const [, cuenta, simbolo] of datos.matchAll(/(\d*)([^\d\s])/g)) {
+    const n = cuenta ? +cuenta : 1;
+    if (simbolo === "$") { f += n; c = 0; }
+    else if (simbolo === "b" || simbolo === ".") c += n;
+    else { for (let i = 0; i < n; i++) vivas.push([f, c + i]); c += n; }
+  }
+  for (const [vf, vc] of vivas) { alto = Math.max(alto, vf + 1); ancho = Math.max(ancho, vc + 1); }
+  return { nombre, ancho, alto, vivas };
+}
+
+const PATRONES = [...document.querySelectorAll("script[data-patron]")]
+  .map((s) => parseRLE(s.textContent, s.dataset.patron));
+
+// --- estado -------------------------------------------------------------------
+
+const S = {
+  cols: 0, filas: 0, celda: 12,
+  grid: new Uint8Array(0), siguiente: new Uint8Array(0), edad: new Uint16Array(0),
+  generacion: 0, poblacion: 0,
+  regla: parseRegla("B3/S23"), toroidal: true,
+  corriendo: true, velocidad: 10, acumulado: 0,
+  colorEdad: false, rejilla: true,
+  herramienta: "pincel", patron: 0,
+  trazo: null, ultima: null, cursor: null,
+};
+
+const $ = (id) => document.getElementById(id);
+const lienzo = $("lienzo");
+const ctx = lienzo.getContext("2d");
+const fuera = document.createElement("canvas");
+const ctxFuera = fuera.getContext("2d");
+let imagen = null;
+
+// --- motor ---------------------------------------------------------------------
+
+function paso() {
+  const { cols, filas, grid, siguiente, edad, regla, toroidal } = S;
+  let poblacion = 0;
+  for (let f = 0; f < filas; f++) {
+    for (let c = 0; c < cols; c++) {
+      let n = 0;
+      for (let df = -1; df <= 1; df++) {
+        let ff = f + df;
+        if (ff < 0 || ff >= filas) { if (!toroidal) continue; ff = (ff + filas) % filas; }
+        const base = ff * cols;
+        for (let dc = -1; dc <= 1; dc++) {
+          if (df === 0 && dc === 0) continue;
+          let cc = c + dc;
+          if (cc < 0 || cc >= cols) { if (!toroidal) continue; cc = (cc + cols) % cols; }
+          n += grid[base + cc];
+        }
+      }
+      const i = f * cols + c;
+      const viva = grid[i] ? regla.sobrevivir[n] : regla.nacer[n];
+      siguiente[i] = viva;
+      edad[i] = viva ? Math.min(edad[i] + 1, 65535) : 0;
+      poblacion += viva;
+    }
+  }
+  S.grid = siguiente;
+  S.siguiente = grid;
+  S.generacion++;
+  S.poblacion = poblacion;
+}
+
+function contar() {
+  let p = 0;
+  for (const v of S.grid) p += v;
+  S.poblacion = p;
+}
+
+function poner(f, c, valor) {
+  if (S.toroidal) {
+    f = ((f % S.filas) + S.filas) % S.filas;
+    c = ((c % S.cols) + S.cols) % S.cols;
+  } else if (f < 0 || f >= S.filas || c < 0 || c >= S.cols) {
+    return;
+  }
+  const i = f * S.cols + c;
+  if (S.grid[i] !== valor) {
+    S.grid[i] = valor;
+    S.edad[i] = valor;
+    S.poblacion += valor ? 1 : -1;
+  }
+}
+
+function limpiar() {
+  S.grid.fill(0); S.edad.fill(0);
+  S.generacion = 0; S.poblacion = 0;
+}
+
+function aleatorio() {
+  for (let i = 0; i < S.grid.length; i++) {
+    S.grid[i] = Math.random() < DENSIDAD ? 1 : 0;
+    S.edad[i] = S.grid[i];
+  }
+  S.generacion = 0;
+  contar();
+}
+
+function estampar(f, c) {
+  const p = PATRONES[S.patron];
+  const f0 = f - Math.floor(p.alto / 2), c0 = c - Math.floor(p.ancho / 2);
+  for (const [pf, pc] of p.vivas) poner(f0 + pf, c0 + pc, 1);
+}
+
+// --- tamaño del tablero --------------------------------------------------------
+
+function redimensionar() {
+  const caja = $("tablero").getBoundingClientRect();
+  const cols = Math.max(5, Math.floor((caja.width - 2) / S.celda));
+  const filas = Math.max(5, Math.floor((caja.height - 2) / S.celda));
+  if (cols === S.cols && filas === S.filas && imagen) { dibujar(); return; }
+
+  // conservar lo que haya, centrado en el nuevo tablero
+  const grid = new Uint8Array(cols * filas), edad = new Uint16Array(cols * filas);
+  const df = Math.floor((filas - S.filas) / 2), dc = Math.floor((cols - S.cols) / 2);
+  for (let f = 0; f < S.filas; f++) {
+    for (let c = 0; c < S.cols; c++) {
+      const nf = f + df, nc = c + dc;
+      if (nf >= 0 && nf < filas && nc >= 0 && nc < cols) {
+        grid[nf * cols + nc] = S.grid[f * S.cols + c];
+        edad[nf * cols + nc] = S.edad[f * S.cols + c];
+      }
+    }
+  }
+  Object.assign(S, { cols, filas, grid, edad, siguiente: new Uint8Array(cols * filas) });
+  contar();
+
+  const dpr = window.devicePixelRatio || 1;
+  lienzo.style.width = `${cols * S.celda}px`;
+  lienzo.style.height = `${filas * S.celda}px`;
+  lienzo.width = Math.round(cols * S.celda * dpr);
+  lienzo.height = Math.round(filas * S.celda * dpr);
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  fuera.width = cols;
+  fuera.height = filas;
+  imagen = ctxFuera.createImageData(cols, filas);
+  dibujar();
+}
+
+// --- dibujo --------------------------------------------------------------------
+
+const COLORES = {};
+let paleta = null;
+
+// convierte cualquier color CSS a [r, g, b] usando el propio canvas
+function aRGB(css) {
+  ctxFuera.fillStyle = "#000";
+  ctxFuera.fillStyle = css;
+  const v = ctxFuera.fillStyle;
+  if (v.startsWith("#")) {
+    const n = parseInt(v.slice(1), 16);
+    return [(n >> 16) & 255, (n >> 8) & 255, n & 255];
+  }
+  return v.match(/[\d.]+/g).slice(0, 3).map(Number);
+}
+
+function leerColores() {
+  const estilo = getComputedStyle(document.documentElement);
+  for (const nombre of ["lienzo", "celula", "rejilla", "fantasma"]) {
+    COLORES[nombre] = estilo.getPropertyValue(`--${nombre}`).trim();
+  }
+  COLORES.lienzoRGB = aRGB(COLORES.lienzo);
+  COLORES.celulaRGB = aRGB(COLORES.celula);
+
+  // edad -> color: las recién nacidas con el color de célula, luego tonos cálidos y fríos
+  const oscuro = matchMedia("(prefers-color-scheme: dark)").matches;
+  const paradas = oscuro
+    ? [[1, [255, 255, 255]], [4, [255, 235, 120]], [12, [255, 160, 50]], [30, [230, 60, 70]], [80, [150, 50, 170]], [255, [70, 70, 200]]]
+    : [[1, [28, 28, 30]], [4, [120, 60, 10]], [12, [214, 90, 20]], [30, [214, 51, 108]], [80, [112, 72, 232]], [255, [28, 126, 214]]];
+  paleta = new Uint8Array(256 * 3);
+  for (let e = 1; e < 256; e++) {
+    let k = 0;
+    while (k < paradas.length - 2 && e > paradas[k + 1][0]) k++;
+    const [e0, c0] = paradas[k], [e1, c1] = paradas[k + 1];
+    const t = Math.min(1, Math.max(0, (e - e0) / (e1 - e0)));
+    for (let j = 0; j < 3; j++) paleta[e * 3 + j] = Math.round(c0[j] + (c1[j] - c0[j]) * t);
+  }
+}
+
+function dibujar() {
+  if (!imagen) return;
+  const datos = imagen.data;
+  const [lr, lg, lb] = COLORES.lienzoRGB, [cr, cg, cb] = COLORES.celulaRGB;
+  for (let i = 0, j = 0; i < S.grid.length; i++, j += 4) {
+    if (!S.grid[i]) { datos[j] = lr; datos[j + 1] = lg; datos[j + 2] = lb; }
+    else if (S.colorEdad) {
+      const e = Math.min(S.edad[i], 255) * 3;
+      datos[j] = paleta[e]; datos[j + 1] = paleta[e + 1]; datos[j + 2] = paleta[e + 2];
+    } else { datos[j] = cr; datos[j + 1] = cg; datos[j + 2] = cb; }
+    datos[j + 3] = 255;
+  }
+  ctxFuera.putImageData(imagen, 0, 0);
+  const ancho = S.cols * S.celda, alto = S.filas * S.celda;
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(fuera, 0, 0, ancho, alto);
+
+  if (S.rejilla && S.celda >= 6) {
+    ctx.beginPath();
+    for (let c = 1; c < S.cols; c++) { ctx.moveTo(c * S.celda + 0.5, 0); ctx.lineTo(c * S.celda + 0.5, alto); }
+    for (let f = 1; f < S.filas; f++) { ctx.moveTo(0, f * S.celda + 0.5); ctx.lineTo(ancho, f * S.celda + 0.5); }
+    ctx.strokeStyle = COLORES.rejilla;
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
+  if (S.herramienta === "patron" && S.cursor) {
+    const p = PATRONES[S.patron];
+    const f0 = S.cursor[0] - Math.floor(p.alto / 2), c0 = S.cursor[1] - Math.floor(p.ancho / 2);
+    ctx.fillStyle = COLORES.fantasma;
+    for (const [pf, pc] of p.vivas) ctx.fillRect((c0 + pc) * S.celda, (f0 + pf) * S.celda, S.celda, S.celda);
+  }
+
+  $("generacion").textContent = S.generacion.toLocaleString("es");
+  $("poblacion").textContent = S.poblacion.toLocaleString("es");
+}
+
+// --- bucle ---------------------------------------------------------------------
+
+let anterior = performance.now();
+function bucle(ahora) {
+  const dt = Math.min((ahora - anterior) / 1000, 0.25);
+  anterior = ahora;
+  if (S.corriendo) {
+    S.acumulado += dt;
+    const intervalo = 1 / S.velocidad;
+    let pasos = 0;
+    while (S.acumulado >= intervalo && pasos < MAX_PASOS_POR_FRAME) {
+      paso();
+      S.acumulado -= intervalo;
+      pasos++;
+    }
+    if (pasos === MAX_PASOS_POR_FRAME) S.acumulado = 0;
+  }
+  dibujar();
+  requestAnimationFrame(bucle);
+}
+
+// --- controles -----------------------------------------------------------------
+
+function alternarReproduccion(valor = !S.corriendo) {
+  S.corriendo = valor;
+  S.acumulado = 0;
+  $("reproducir").textContent = valor ? "Pausar" : "Reproducir";
+  $("reproducir").setAttribute("aria-pressed", String(!valor));
+}
+
+function avanzarUno() {
+  paso();
+  dibujar();
+}
+
+function fijarVelocidad(indice) {
+  indice = Math.max(0, Math.min(VELOCIDADES.length - 1, indice));
+  S.velocidad = VELOCIDADES[indice];
+  $("velocidad").value = indice;
+  $("velocidad-valor").textContent = `${S.velocidad} gen/s`;
+}
+
+function fijarHerramienta(nombre) {
+  S.herramienta = nombre;
+  for (const b of document.querySelectorAll("[data-herramienta]")) {
+    b.setAttribute("aria-pressed", String(b.dataset.herramienta === nombre));
+  }
+}
+
+function fijarPatron(indice) {
+  S.patron = ((indice % PATRONES.length) + PATRONES.length) % PATRONES.length;
+  $("patron").value = S.patron;
+  fijarHerramienta("patron");
+}
+
+function fijarRegla(texto) {
+  const regla = parseRegla(texto);
+  const entrada = $("regla");
+  if (!regla) {
+    entrada.setAttribute("aria-invalid", "true");
+    $("aviso").textContent = "Regla no válida: usa la notación B/S, por ejemplo B3/S23 o B36/S23.";
+    return;
+  }
+  entrada.removeAttribute("aria-invalid");
+  $("aviso").textContent = "";
+  S.regla = regla;
+  entrada.value = regla.texto;
+  const preset = PRESETS.find((p) => p[2] === regla.texto);
+  $("preset").value = preset ? preset[0] : "";
+}
+
+$("reproducir").addEventListener("click", () => alternarReproduccion());
+$("paso").addEventListener("click", avanzarUno);
+$("limpiar").addEventListener("click", () => { limpiar(); dibujar(); });
+$("aleatorio").addEventListener("click", () => { aleatorio(); dibujar(); });
+$("velocidad").addEventListener("input", (e) => fijarVelocidad(+e.target.value));
+for (const b of document.querySelectorAll("[data-herramienta]")) {
+  b.addEventListener("click", () => fijarHerramienta(b.dataset.herramienta));
+}
+
+const selPatron = $("patron");
+PATRONES.forEach((p, i) => selPatron.add(new Option(`${i + 1}. ${p.nombre}`, i)));
+selPatron.addEventListener("change", (e) => fijarPatron(+e.target.value));
+
+const selPreset = $("preset");
+selPreset.add(new Option("Personalizada", ""));
+for (const [clave, nombre, texto] of PRESETS) selPreset.add(new Option(`${nombre} (${texto})`, clave));
+selPreset.addEventListener("change", (e) => {
+  const p = PRESETS.find((x) => x[0] === e.target.value);
+  if (p) fijarRegla(p[2]);
+});
+$("regla").addEventListener("change", (e) => fijarRegla(e.target.value));
+$("regla").addEventListener("keydown", (e) => { if (e.key === "Enter") fijarRegla(e.target.value); });
+
+$("bordes").addEventListener("change", (e) => { S.toroidal = e.target.value === "toroidal"; });
+$("color-edad").addEventListener("change", (e) => { S.colorEdad = e.target.checked; dibujar(); });
+$("mostrar-rejilla").addEventListener("change", (e) => { S.rejilla = e.target.checked; dibujar(); });
+$("celda").addEventListener("change", (e) => { S.celda = +e.target.value; redimensionar(); });
+
+// pintar con ratón, lápiz o dedo
+function celdaDe(evento, ajustar) {
+  const r = lienzo.getBoundingClientRect();
+  let f = Math.floor((evento.clientY - r.top) / S.celda);
+  let c = Math.floor((evento.clientX - r.left) / S.celda);
+  if (ajustar) {
+    f = Math.max(0, Math.min(S.filas - 1, f));
+    c = Math.max(0, Math.min(S.cols - 1, c));
+  } else if (f < 0 || f >= S.filas || c < 0 || c >= S.cols) {
+    return null;
+  }
+  return [f, c];
+}
+
+function linea([f0, c0], [f1, c1]) {
+  const df = Math.abs(f1 - f0), dc = -Math.abs(c1 - c0);
+  const sf = f0 < f1 ? 1 : -1, sc = c0 < c1 ? 1 : -1;
+  let err = df + dc;
+  for (;;) {
+    poner(f0, c0, S.trazo);
+    if (f0 === f1 && c0 === c1) return;
+    const e2 = 2 * err;
+    if (e2 >= dc) { err += dc; f0 += sf; }
+    if (e2 <= df) { err += df; c0 += sc; }
+  }
+}
+
+lienzo.addEventListener("pointerdown", (e) => {
+  const celda = celdaDe(e, false);
+  if (!celda) return;
+  S.cursor = celda;
+  if (S.herramienta === "patron" && e.button === 0) {
+    estampar(...celda);
+  } else if (S.herramienta === "patron" && e.button === 2) {
+    fijarHerramienta("pincel");
+  } else {
+    S.trazo = S.herramienta === "goma" || e.button === 2 ? 0 : 1;
+    S.ultima = celda;
+    poner(celda[0], celda[1], S.trazo);
+    lienzo.setPointerCapture(e.pointerId);
+  }
+  dibujar();
+});
+lienzo.addEventListener("pointermove", (e) => {
+  S.cursor = celdaDe(e, true);
+  if (S.trazo !== null) {
+    linea(S.ultima, S.cursor);
+    S.ultima = S.cursor;
+  }
+});
+const terminarTrazo = () => { S.trazo = null; };
+lienzo.addEventListener("pointerup", terminarTrazo);
+lienzo.addEventListener("pointercancel", terminarTrazo);
+lienzo.addEventListener("pointerleave", () => { if (S.trazo === null) S.cursor = null; });
+lienzo.addEventListener("contextmenu", (e) => e.preventDefault());
+
+// atajos de teclado
+document.addEventListener("keydown", (e) => {
+  if (e.ctrlKey || e.metaKey || e.altKey) return;
+  const t = e.target;
+  if (t.matches("input[type=text], select")) return;
+  if (e.key === " " && t.matches("button, input")) return; // Espacio ya activa el control enfocado
+  const k = e.key.toLowerCase();
+  const acciones = {
+    " ": () => alternarReproduccion(),
+    n: avanzarUno,
+    c: () => { limpiar(); dibujar(); },
+    r: () => { aleatorio(); dibujar(); },
+    "+": () => fijarVelocidad(VELOCIDADES.indexOf(S.velocidad) + 1),
+    "=": () => fijarVelocidad(VELOCIDADES.indexOf(S.velocidad) + 1),
+    "-": () => fijarVelocidad(VELOCIDADES.indexOf(S.velocidad) - 1),
+    a: () => $("color-edad").click(),
+    g: () => $("mostrar-rejilla").click(),
+    b: () => fijarHerramienta("pincel"),
+    e: () => fijarHerramienta("goma"),
+    p: () => fijarPatron(S.herramienta === "patron" ? S.patron + 1 : S.patron),
+    escape: () => fijarHerramienta("pincel"),
+  };
+  if (acciones[k]) {
+    e.preventDefault();
+    acciones[k]();
+  } else if (/^[1-9]$/.test(k) && +k <= PATRONES.length) {
+    fijarPatron(+k - 1);
+  }
+});
+
+// --- inicio --------------------------------------------------------------------
+
+matchMedia("(prefers-color-scheme: dark)").addEventListener("change", () => { leerColores(); dibujar(); });
+leerColores();
+
+S.celda = matchMedia("(pointer: coarse)").matches ? 14 : 10;
+$("celda").value = S.celda;
+fijarVelocidad(VELOCIDADES.indexOf(10));
+fijarHerramienta("pincel");
+selPreset.value = "conway";
+
+let pendiente = false;
+new ResizeObserver(() => {
+  if (pendiente) return;
+  pendiente = true;
+  requestAnimationFrame(() => { pendiente = false; redimensionar(); });
+}).observe($("tablero"));
+redimensionar();
+
+// empezar con el cañón de Gosper si cabe; si no, con células al azar
+const canon = PATRONES.findIndex((p) => p.nombre.startsWith("Cañón"));
+if (S.cols >= 44 && S.filas >= 24) {
+  S.patron = canon;
+  estampar(8, 22);
+  selPatron.value = canon;
+} else {
+  aleatorio();
+}
+dibujar();
+requestAnimationFrame(bucle);
+</script>
+</body>
+</html>
