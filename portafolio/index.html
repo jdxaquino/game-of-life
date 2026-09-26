@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Juan José D'Aquino Bautista</title>
+<meta name="description" content="Científico de datos espaciales y AI/ML Technical Lead en Grupo Bimbo Global. Análisis de proximidad, H3, índices espaciales y GeoPandas.">
+<meta name="author" content="Juan José D'Aquino Bautista">
+
+<!-- Vista previa al compartir el enlace (LinkedIn, WhatsApp, X…).
+     Cambia og:url por la dirección definitiva del sitio. -->
+<meta property="og:type" content="profile">
+<meta property="og:locale" content="es_MX">
+<meta property="og:title" content="Juan José D'Aquino Bautista · Ciencia de datos espaciales">
+<meta property="og:description" content="Análisis de proximidad, H3, índices espaciales y GeoPandas. AI/ML Technical Lead en Grupo Bimbo Global.">
+<meta property="og:url" content="https://jdxaquino.github.io/">
+<meta property="og:image" content="https://jdxaquino.github.io/img/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+
+<link rel="icon" href="img/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@62..125,100..900&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="estilos.css">
+<script>
+  // Aplica el tema guardado antes de pintar para evitar un destello.
+  try {
+    var tema = localStorage.getItem("tema");
+    if (tema === "claro" || tema === "oscuro") {
+      document.documentElement.dataset.theme = tema === "oscuro" ? "dark" : "light";
+    }
+  } catch (e) {}
+</script>
+</head>
+<body>
+
+<!-- Iconos de la leyenda: se reutilizan en las etiquetas de los proyectos. -->
+<svg class="sprite" aria-hidden="true" focusable="false">
+  <symbol id="g-proximidad" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" fill="none" stroke="currentColor" stroke-width="1.5" stroke-dasharray="2.5 2.5"/><circle cx="12" cy="12" r="5.5" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="12" r="2" fill="currentColor"/></symbol>
+  <symbol id="g-h3" viewBox="0 0 24 24"><polygon points="12,2 20.7,7 20.7,17 12,22 3.3,17 3.3,7" fill="none" stroke="currentColor" stroke-width="1.5"/><polygon points="12,8 15.5,10 15.5,14 12,16 8.5,14 8.5,10" fill="currentColor"/></symbol>
+  <symbol id="g-indice" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="18" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="5" y="6" width="7" height="6" fill="none" stroke="currentColor" stroke-width="1.5"/><rect x="13" y="11" width="6" height="7" fill="currentColor"/></symbol>
+  <symbol id="g-geopandas" viewBox="0 0 24 24"><polygon points="3,6 11,2 20,5 22,14 15,21 5,19 2,12" fill="none" stroke="currentColor" stroke-width="1.5"/><polygon points="11,2 12,11 22,14" fill="currentColor"/><path d="M12 11 5 19" stroke="currentColor" stroke-width="1.5"/></symbol>
+  <symbol id="g-ml" viewBox="0 0 24 24"><path d="M5 6 12 12 5 18M12 12h7" fill="none" stroke="currentColor" stroke-width="1.5"/><circle cx="5" cy="6" r="2.5" fill="currentColor"/><circle cx="5" cy="18" r="2.5" fill="currentColor"/><circle cx="12" cy="12" r="2.5" fill="currentColor"/><circle cx="19" cy="12" r="2.5" fill="currentColor"/></symbol>
+  <!-- un glider del Juego de la Vida -->
+  <symbol id="g-curiosidad" viewBox="0 0 24 24"><rect x="10" y="2" width="6" height="6" fill="currentColor"/><rect x="16" y="9" width="6" height="6" fill="currentColor"/><rect x="2" y="16" width="6" height="6" fill="currentColor"/><rect x="9" y="16" width="6" height="6" fill="currentColor"/><rect x="16" y="16" width="6" height="6" fill="currentColor"/></symbol>
+</svg>
+
+<a class="saltar" href="#contenido">Saltar al contenido</a>
+
+<header class="barra">
+  <div class="envoltura barra__fila">
+    <a class="marca" href="#inicio">
+      <svg class="glifo" aria-hidden="true"><use href="#g-h3"/></svg>
+      J. J. D'Aquino
+    </a>
+    <nav class="menu" aria-label="Secciones">
+      <a href="#especialidad">Especialidad</a>
+      <a href="#proyectos">Proyectos</a>
+      <a href="#trayectoria">Trayectoria</a>
+      <a href="#contacto">Contacto</a>
+    </nav>
+    <button class="tema" id="tema" type="button" aria-label="Cambiar entre tema claro y oscuro">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg>
+    </button>
+  </div>
+</header>
+
+<main id="contenido">
+
+  <!-- Aviso que solo aparece mientras queden textos marcados con class="pendiente". -->
+  <p class="borrador" id="borrador" hidden>
+    Borrador: quedan <b id="borrador-n">0</b> datos por completar, marcados
+    <span class="pendiente">así</span>. Edítalos en <code>index.html</code> antes de publicar.
+  </p>
+
+  <!-- ============ PORTADA ============ -->
+  <section class="portada envoltura" id="inicio">
+    <div class="portada__texto">
+      <p class="coordenadas">20.67° N · 103.35° O — Guadalajara, Jalisco</p>
+      <h1>Juan José <span>D'Aquino Bautista</span></h1>
+      <p class="cargo">
+        Científico de datos espaciales<br>
+        AI/ML Technical Lead · Dirección de Inteligencia Artificial, Grupo Bimbo Global
+      </p>
+      <p class="entrada">
+        Trabajo con datos que tienen ubicación. Mido la cercanía entre lugares, agrego
+        información en hexágonos H3 e indexo geometrías para que las consultas espaciales
+        escalen. Hoy lidero soluciones de inteligencia artificial y machine learning en producción.
+      </p>
+      <div class="acciones">
+        <!-- Pon aquí la dirección de tu perfil y quita class="pendiente" -->
+        <a class="boton boton--principal pendiente" href="https://www.linkedin.com/">LinkedIn</a>
+        <a class="boton" href="https://github.com/jdxaquino">GitHub</a>
+        <a class="boton" href="#contacto">Contacto</a>
+        <!-- Para ofrecer tu CV: copia tu PDF como cv.pdf junto a este archivo y descomenta:
+        <a class="boton" href="cv.pdf">CV (PDF)</a> -->
+      </div>
+    </div>
+
+    <figure class="visor" id="mapa">
+      <div class="visor__barra">
+        <span class="visor__titulo">Proximidad en H3 · centro de Guadalajara</span>
+        <div class="segmentos" role="group" aria-label="Resolución H3">
+          <button type="button" data-res="7" aria-pressed="false">res 7</button>
+          <button type="button" data-res="8" aria-pressed="true">res 8</button>
+          <button type="button" data-res="9" aria-pressed="false">res 9</button>
+        </div>
+      </div>
+      <canvas id="mapa-lienzo" class="visor__lienzo" role="img"
+        aria-label="Mapa de celdas hexagonales H3 del centro de Guadalajara, coloreadas según la distancia al punto más cercano."></canvas>
+      <figcaption class="visor__pie">
+        <div class="leyenda">
+          <span class="leyenda__titulo">Distancia al punto más cercano</span>
+          <span class="leyenda__rampa" aria-hidden="true"></span>
+          <span class="leyenda__marcas" aria-hidden="true">
+            <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5+ km</span>
+          </span>
+        </div>
+        <p class="lectura" id="mapa-lectura">Cargando H3…</p>
+        <p class="visor__nota">
+          Haz clic (o toca) en el mapa para agregar o quitar puntos. Los puntos iniciales son de ejemplo.
+          <button type="button" class="enlace" id="mapa-reiniciar">Restablecer</button>
+        </p>
+      </figcaption>
+    </figure>
+  </section>
+
+  <!-- ============ ESPECIALIDAD ============ -->
+  <section class="seccion" id="especialidad">
+    <div class="envoltura">
+      <div class="seccion__cabeza">
+        <div>
+          <p class="ceja">Leyenda</p>
+          <h2>Especialidad</h2>
+        </div>
+        <p class="seccion__entrada">
+          Estos símbolos marcan los métodos en cada proyecto de la galería.
+        </p>
+      </div>
+
+      <dl class="leyenda-grande">
+        <div class="clave">
+          <dt><svg class="glifo" aria-hidden="true"><use href="#g-proximidad"/></svg>Proximidad espacial</dt>
+          <dd>Distancia al sitio más cercano, áreas de influencia y cobertura. Joins por cercanía
+            (<code>sjoin_nearest</code>) y buffers en una proyección métrica.</dd>
+        </div>
+        <div class="clave">
+          <dt><svg class="glifo" aria-hidden="true"><use href="#g-h3"/></svg>Indexación hexagonal H3</dt>
+          <dd>Agregar eventos en celdas de área casi uniforme, comparar zonas entre resoluciones y
+            medir vecindad en anillos (<code>grid_disk</code>).</dd>
+        </div>
+        <div class="clave">
+          <dt><svg class="glifo" aria-hidden="true"><use href="#g-indice"/></svg>Índices espaciales</dt>
+          <dd>R-tree y STRtree: filtrar por caja envolvente antes de la prueba geométrica exacta
+            para que los joins escalen a millones de geometrías.</dd>
+        </div>
+        <div class="clave">
+          <dt><svg class="glifo" aria-hidden="true"><use href="#g-ml"/></svg>IA y ML en producción</dt>
+          <dd>Modelos con variables espaciales, llevados a producción y operados con prácticas de MLOps.</dd>
+        </div>
+      </dl>
+
+      <p class="herramientas">
+        <span class="ceja">Herramientas</span>
+        Python · GeoPandas · Shapely · H3 · NumPy · Google Colab
+        <span class="pendiente">[agrega las que uses: PostGIS, QGIS, scikit-learn…]</span>
+      </p>
+    </div>
+  </section>
+
+  <!-- ============ PROYECTOS ============
+       Para añadir un proyecto copia un <article class="proyecto"> completo.
+       data-temas lleva los filtros separados por espacios:
+       proximidad, h3, indice, geopandas, curiosidad.
+       Las imágenes van en img/proyectos/ (ideal: 1280×800, proporción 16:10). -->
+  <section class="seccion" id="proyectos">
+    <div class="envoltura">
+      <div class="seccion__cabeza">
+        <div>
+          <p class="ceja"><span id="proyectos-n">6</span> proyectos</p>
+          <h2>Proyectos</h2>
+        </div>
+        <p class="seccion__entrada">
+          Metodologías aplicadas con datos abiertos. Filtra por método:
+        </p>
+      </div>
+
+      <div class="filtros" role="group" aria-label="Filtrar proyectos por método">
+        <button type="button" data-filtro="todos" aria-pressed="true">Todos</button>
+        <button type="button" data-filtro="proximidad" aria-pressed="false"><svg class="glifo" aria-hidden="true"><use href="#g-proximidad"/></svg>Proximidad</button>
+        <button type="button" data-filtro="h3" aria-pressed="false"><svg class="glifo" aria-hidden="true"><use href="#g-h3"/></svg>H3</button>
+        <button type="button" data-filtro="indice" aria-pressed="false"><svg class="glifo" aria-hidden="true"><use href="#g-indice"/></svg>Índice espacial</button>
+        <button type="button" data-filtro="geopandas" aria-pressed="false"><svg class="glifo" aria-hidden="true"><use href="#g-geopandas"/></svg>GeoPandas</button>
+        <button type="button" data-filtro="curiosidad" aria-pressed="false"><svg class="glifo" aria-hidden="true"><use href="#g-curiosidad"/></svg>Curiosidades</button>
+      </div>
+
+      <div class="galeria" id="galeria">
+
+        <article class="proyecto" data-temas="proximidad geopandas indice">
+          <img src="img/proyectos/proximidad.svg" width="640" height="400" loading="lazy"
+            alt="Puntos de demanda unidos por líneas a su sitio más cercano, con anillos de distancia.">
+          <div class="proyecto__cuerpo">
+            <h3>Proximidad a servicios</h3>
+            <p>Distancia de cada punto de demanda a su sitio más cercano con <code>sjoin_nearest</code>
+              y áreas de influencia por buffers.
+              <span class="pendiente">[caso, datos usados y resultado]</span></p>
+            <ul class="temas">
+              <li><svg class="glifo" aria-hidden="true"><use href="#g-proximidad"/></svg>Proximidad</li>
+              <li><svg class="glifo" aria-hidden="true"><use href="#g-geopandas"/></svg>GeoPandas</li>
+              <li><svg class="glifo" aria-hidden="true"><use href="#g-indice"/></svg>Índice espacial</li>
+            </ul>
+            <p class="proyecto__enlaces"><a class="pendiente" href="https://colab.research.google.com/">Notebook en Colab ↗</a></p>
+          </div>
+        </article>
+
+        <article class="proyecto" data-temas="h3 proximidad">
+          <img src="img/proyectos/h3.svg" width="640" height="400" loading="lazy"
+            alt="Mosaico de hexágonos coloreados por número de anillos desde la celda central.">
+          <div class="proyecto__cuerpo">
+            <h3>Mosaico hexagonal H3</h3>
+            <p>Agregación de puntos en celdas H3 a varias resoluciones y vecindarios por anillos para
+              comparar zonas con celdas del mismo tamaño. El mapa de la portada usa la misma idea.</p>
+            <ul class="temas">
+              <li><svg class="glifo" aria-hidden="true"><use href="#g-h3"/></svg>H3</li>
+              <li><svg class="glifo" aria-hidden="true"><use href="#g-proximidad"/></svg>Proximidad</li>
+            </ul>
+            <p class="proyecto__enlaces">
+              <a href="#mapa">Probar el mapa</a>
+              <a class="pendiente" href="https://colab.research.google.com/">Notebook ↗</a>
+            </p>
+          </div>
+        </article>
+
+        <article class="proyecto" data-temas="indice geopandas">
+          <img src="img/proyectos/indice-espacial.svg" width="640" height="400" loading="lazy"
+            alt="Puntos agrupados en cajas envolventes anidadas de un R-tree y una ventana de consulta.">
+          <div class="proyecto__cuerpo">
+            <h3>Joins espaciales a escala</h3>
+            <p>El índice espacial (<code>sindex</code>) filtra por caja envolvente y solo después se hace
+              la prueba geométrica exacta.
+              <span class="pendiente">[tamaño de los datos y tiempo antes / después]</span></p>
+            <ul class="temas">
+              <li><svg class="glifo" aria-hidden="true"><use href="#g-indice"/></svg>Índice espacial</li>
+              <li><svg class="glifo" aria-hidden="true"><use href="#g-geopandas"/></svg>GeoPandas</li>
+            </ul>
+            <p class="proyecto__enlaces"><a class="pendiente" href="https://github.com/jdxaquino">Código ↗</a></p>
+          </div>
+        </article>
+
+        <article class="proyecto" data-temas="geopandas">
+          <img src="img/proyectos/geopandas.svg" width="640" height="400" loading="lazy"
+            alt="Mapa coroplético de polígonos irregulares con la escala de color viridis.">
+          <div class="proyecto__cuerpo">
+            <h3>Cartografía temática</h3>
+            <p>Mapas coropléticos con datos abiertos de INEGI y OpenStreetMap, reproyectados a
+              EPSG:6372 (México ITRF2008 / LCC) para medir en metros.
+              <span class="pendiente">[tema del mapa]</span></p>
+            <ul class="temas">
+              <li><svg class="glifo" aria-hidden="true"><use href="#g-geopandas"/></svg>GeoPandas</li>
+            </ul>
+            <p class="proyecto__enlaces"><a class="pendiente" href="https://colab.research.google.com/">Notebook en Colab ↗</a></p>
+          </div>
+        </article>
+
+        <article class="proyecto" data-temas="curiosidad">
+          <img src="img/proyectos/juego-de-la-vida.png" width="640" height="400" loading="lazy"
+            alt="Cañón de Gosper disparando gliders en diagonal, coloreados según su edad.">
+          <div class="proyecto__cuerpo">
+            <h3>Juego de la Vida</h3>
+            <p>El autómata de Conway con NumPy: cuenta los vecinos de toda la rejilla a la vez y va
+              unas 250 veces más rápido que el bucle celda a celda. Incluye patrones RLE, reglas B/S
+              y una versión web.</p>
+            <ul class="temas">
+              <li><svg class="glifo" aria-hidden="true"><use href="#g-curiosidad"/></svg>Curiosidades</li>
+            </ul>
+            <p class="proyecto__enlaces">
+              <a href="https://jdxaquino.github.io/game-of-life/">Jugar ↗</a>
+              <a href="https://github.com/jdxaquino/game-of-life">Código ↗</a>
+            </p>
+          </div>
+        </article>
+
+        <article class="proyecto" data-temas="curiosidad">
+          <img src="img/proyectos/colab.svg" width="640" height="400" loading="lazy"
+            alt="Curva de Hilbert de orden 5 coloreada a lo largo de su recorrido.">
+          <div class="proyecto__cuerpo">
+            <h3>Cuadernos en Google Colab</h3>
+            <p>Experimentos cortos para explorar una idea.
+              <span class="pendiente">[2 o 3 notebooks con una línea cada uno]</span></p>
+            <ul class="temas">
+              <li><svg class="glifo" aria-hidden="true"><use href="#g-curiosidad"/></svg>Curiosidades</li>
+            </ul>
+            <p class="proyecto__enlaces"><a class="pendiente" href="https://colab.research.google.com/">Abrir en Colab ↗</a></p>
+          </div>
+        </article>
+
+      </div>
+      <p class="galeria__vacia" id="galeria-vacia" hidden>No hay proyectos con ese método todavía.</p>
+    </div>
+  </section>
+
+  <!-- ============ TRAYECTORIA ============ -->
+  <section class="seccion" id="trayectoria">
+    <div class="envoltura">
+      <div class="seccion__cabeza">
+        <div>
+          <p class="ceja">Experiencia y formación</p>
+          <h2>Trayectoria</h2>
+        </div>
+      </div>
+
+      <div class="trayectoria">
+        <div>
+          <h3 class="trayectoria__titulo">Experiencia</h3>
+          <ol class="linea">
+            <li>
+              <p class="linea__fecha"><span class="pendiente">20XX</span> – hoy</p>
+              <div>
+                <h4>AI/ML Technical Lead</h4>
+                <p class="linea__lugar">Dirección de Inteligencia Artificial · Grupo Bimbo Global</p>
+                <p><span class="pendiente">[2 o 3 líneas: productos de IA/ML que lideras, equipo y alcance]</span></p>
+              </div>
+            </li>
+            <li>
+              <p class="linea__fecha"><span class="pendiente">20XX – 20XX</span></p>
+              <div>
+                <h4><span class="pendiente">[Puesto]</span></h4>
+                <p class="linea__lugar">Megacable</p>
+                <p><span class="pendiente">[proyectos y logros principales]</span></p>
+              </div>
+            </li>
+          </ol>
+        </div>
+
+        <div>
+          <h3 class="trayectoria__titulo">Formación</h3>
+          <ol class="linea">
+            <li>
+              <p class="linea__fecha"><span class="pendiente">20XX</span></p>
+              <div>
+                <h4>Doctorado en <span class="pendiente">[programa]</span></h4>
+                <p class="linea__lugar"><span class="pendiente">[institución]</span></p>
+                <p>Tesis: <span class="pendiente">[título]</span></p>
+              </div>
+            </li>
+            <li>
+              <p class="linea__fecha"><span class="pendiente">20XX</span></p>
+              <div>
+                <h4>Maestría en <span class="pendiente">[programa]</span></h4>
+                <p class="linea__lugar"><span class="pendiente">[institución]</span></p>
+              </div>
+            </li>
+            <li>
+              <p class="linea__fecha"><span class="pendiente">20XX</span></p>
+              <div>
+                <h4>Licenciatura en <span class="pendiente">[carrera]</span></h4>
+                <p class="linea__lugar"><span class="pendiente">[institución]</span></p>
+              </div>
+            </li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ CONTACTO ============ -->
+  <section class="seccion" id="contacto">
+    <div class="envoltura">
+      <div class="seccion__cabeza">
+        <div>
+          <h2>Contacto</h2>
+        </div>
+        <p class="seccion__entrada">
+          Si trabajas con datos de ubicación y quieres conversar sobre un proyecto, escríbeme.
+        </p>
+      </div>
+      <ul class="contacto">
+        <li>
+          <span class="contacto__red">LinkedIn</span>
+          <a class="pendiente" href="https://www.linkedin.com/">[linkedin.com/in/tu-perfil]</a>
+        </li>
+        <li>
+          <span class="contacto__red">GitHub</span>
+          <a href="https://github.com/jdxaquino">github.com/jdxaquino</a>
+        </li>
+        <li>
+          <span class="contacto__red">Correo</span>
+          <span class="pendiente">[el correo que quieras mostrar]</span>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+</main>
+
+<footer class="pie">
+  <div class="envoltura pie__fila">
+    <p>© <span id="anio">2026</span> Juan José D'Aquino Bautista</p>
+    <p>Mapa: celdas H3 con <a href="https://github.com/uber/h3-js">h3-js</a>, coordenadas EPSG:4326.</p>
+  </div>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/h3-js@4.5.0/dist/h3-js.umd.js"></script>
+<script src="js/mapa-h3.js"></script>
+<script src="js/sitio.js"></script>
+</body>
+</html>
