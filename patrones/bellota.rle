@@ -1,4 +1,4 @@
 #N Bellota (acorn)
-#C Siete celulas que evolucionan durante 5206 generaciones antes de estabilizarse.
+#C Siete células que evolucionan durante 5206 generaciones antes de estabilizarse.
 x = 7, y = 3, rule = B3/S23
 bo5b$3bo3b$2o2b3o!

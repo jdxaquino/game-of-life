@@ -98,7 +98,7 @@ def cargar_patron(nombre_o_ruta: str) -> Patron:
         ruta = DIRECTORIO / f"{nombre_o_ruta}.rle"
     if not ruta.is_file():
         raise ValueError(
-            f"no existe el patron {nombre_o_ruta!r}; "
+            f"no existe el patrón {nombre_o_ruta!r}; "
             f"disponibles: {', '.join(listar_patrones())} (o la ruta a un .rle)"
         )
     return parse_rle(ruta.read_text(encoding="utf-8"), nombre=ruta.stem)

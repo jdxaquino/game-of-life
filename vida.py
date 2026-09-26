@@ -48,7 +48,7 @@ def parse_regla(texto: str) -> Regla:
     m = _PATRON_REGLA.match(texto)
     if not m:
         raise ValueError(
-            f"regla no valida: {texto!r}; usa la notacion B/S (p. ej. B3/S23) "
+            f"regla no válida: {texto!r}; usa la notación B/S (p. ej. B3/S23) "
             f"o uno de: {', '.join(PRESETS)}"
         )
     return Regla(
