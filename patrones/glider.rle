@@ -1,0 +1,4 @@
+#N Glider
+#C La nave espacial mas pequena: avanza una celda en diagonal cada 4 generaciones.
+x = 3, y = 3, rule = B3/S23
+bo$2bo$3o!
